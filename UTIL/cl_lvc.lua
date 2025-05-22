@@ -396,6 +396,24 @@ local function CleanupSounds()
 	end
 end
 ---------------------------------------------------------------------
+local function stateSetIndicForVeh(fVehicle, newstate)
+  if DoesEntityExist(fVehicle) and not IsEntityDead(fVehicle) then
+		if newstate == ind_state_o then
+			SetVehicleIndicatorLights(fVehicle, 0, false) -- R
+			SetVehicleIndicatorLights(fVehicle, 1, false) -- L
+		elseif newstate == ind_state_l then
+			SetVehicleIndicatorLights(fVehicle, 0, false) -- R
+			SetVehicleIndicatorLights(fVehicle, 1, true) -- L
+		elseif newstate == ind_state_r then
+			SetVehicleIndicatorLights(fVehicle, 0, true) -- R
+			SetVehicleIndicatorLights(fVehicle, 1, false) -- L
+		elseif newstate == ind_state_h then
+			SetVehicleIndicatorLights(fVehicle, 0, true) -- R
+			SetVehicleIndicatorLights(fVehicle, 1, true) -- L
+		end
+		state_indic[fVehicle] = newstate
+	end
+end
 function TogIndicStateForVeh(vehicle, newstate)
 	if DoesEntityExist(vehicle) and not IsEntityDead(vehicle) then
 		if newstate == ind_state_o then
@@ -425,6 +443,23 @@ function TogMuteDfltSrnForVeh(vehicle, toggle)
 end
 
 ---------------------------------------------------------------------
+local function stateSetLxSirenForVeh(fVehicle, newstate)
+	if DoesEntityExist(fVehicle) and not IsEntityDead(fVehicle) then
+		if newstate ~= state_lxsiren[fVehicle] and newstate ~= nil then
+			if snd_lxsiren[fVehicle] ~= nil then
+				StopSound(snd_lxsiren[fVehicle])
+				ReleaseSoundId(snd_lxsiren[fVehicle])
+				snd_lxsiren[fVehicle] = nil
+			end
+			if newstate ~= 0 then
+				snd_lxsiren[fVehicle] = GetSoundId()
+				PlaySoundFromEntity(snd_lxsiren[fVehicle], SIRENS[newstate].String, fVehicle, SIRENS[newstate].Ref, 0, 0)
+				TogMuteDfltSrnForVeh(fVehicle, true)
+			end
+			state_lxsiren[fVehicle] = newstate
+		end
+	end
+end
 function SetLxSirenStateForVeh(vehicle, newstate)
 	if DoesEntityExist(vehicle) and not IsEntityDead(vehicle) then
 		if newstate ~= state_lxsiren[vehicle] and newstate ~= nil then
@@ -446,6 +481,22 @@ function SetLxSirenStateForVeh(vehicle, newstate)
 end
 
 ---------------------------------------------------------------------
+local function stateSetPowercallForVeh(fVehicle, newstate)
+	if DoesEntityExist(fVehicle) and not IsEntityDead(fVehicle) then
+		if newstate ~= state_pwrcall[fVehicle] and newstate ~= nil then
+			if snd_pwrcall[fVehicle] ~= nil then
+				StopSound(snd_pwrcall[fVehicle])
+				ReleaseSoundId(snd_pwrcall[fVehicle])
+				snd_pwrcall[fVehicle] = nil
+			end
+			if newstate ~= 0 then
+				snd_pwrcall[fVehicle] = GetSoundId()
+				PlaySoundFromEntity(snd_pwrcall[fVehicle], SIRENS[newstate].String, fVehicle, SIRENS[newstate].Ref, 0, 0)
+			end
+			state_pwrcall[fVehicle] = newstate
+		end
+	end
+end
 function SetPowercallStateForVeh(vehicle, newstate)
 	if DoesEntityExist(vehicle) and not IsEntityDead(vehicle) then
 		if newstate ~= state_pwrcall[vehicle] and newstate ~= nil then
@@ -466,6 +517,22 @@ function SetPowercallStateForVeh(vehicle, newstate)
 end
 
 ---------------------------------------------------------------------
+local function stateSetAirManuForVeh(fVehicle, newstate)
+	if DoesEntityExist(fVehicle) and not IsEntityDead(fVehicle) then
+		if newstate ~= state_airmanu[fVehicle] and newstate ~= nil then
+			if snd_airmanu[fVehicle] ~= nil then
+				StopSound(snd_airmanu[fVehicle])
+				ReleaseSoundId(snd_airmanu[fVehicle])
+				snd_airmanu[fVehicle] = nil
+			end
+			if newstate ~= 0 then
+				snd_airmanu[fVehicle] = GetSoundId()
+				PlaySoundFromEntity(snd_airmanu[fVehicle], SIRENS[newstate].String, fVehicle, SIRENS[newstate].Ref, 0, 0)
+			end
+			state_airmanu[fVehicle] = newstate
+		end
+	end
+end
 function SetAirManuStateForVeh(vehicle, newstate)
 	if DoesEntityExist(vehicle) and not IsEntityDead(vehicle) then
 		if newstate ~= state_airmanu[vehicle] and newstate ~= nil then
@@ -505,7 +572,7 @@ AddStateBagChangeHandler('lvcIndicator', nil, function(bagName, key, value)
 	local entity = GetEntityFromStateBagName(bagName)
 	if entity == veh then print("State of own vehicle") return end
 	if DoesEntityExist(entity) then
-		TogIndicStateForVeh(entity, value)
+		stateSetIndicForVeh(entity, value)
 	end
 end)
 
@@ -564,7 +631,7 @@ AddStateBagChangeHandler('lvcSiren', nil, function(bagName, key, value)
 	local entity = GetEntityFromStateBagName(bagName)
 	if entity == veh then return end
 	if DoesEntityExist(entity) then
-		SetLxSirenStateForVeh(entity, value)
+		stateSetLxSirenForVeh(entity, value)
 	end
 end)
 
@@ -586,7 +653,7 @@ AddStateBagChangeHandler('lvcPwrcall', nil, function(bagName, key, value)
 	local entity = GetEntityFromStateBagName(bagName)
 	if entity == veh then return end
 	if DoesEntityExist(entity) then
-		SetPowercallStateForVeh(entity, value)
+		stateSetPowercallForVeh(entity, value)
 	end
 end)
 
@@ -608,7 +675,7 @@ AddStateBagChangeHandler('lvcAirmanu', nil, function(bagName, key, value)
 	local entity = GetEntityFromStateBagName(bagName)
 	if entity == veh then return end
 	if DoesEntityExist(entity) then
-		SetAirManuStateForVeh(entity, value)
+		stateSetAirManuForVeh(entity, value)
 	end
 end)
 
@@ -972,7 +1039,7 @@ end
 
 RegisterCommand("*lvc:Lights", function(source, args, raw)
 	if not canUseKeys() then return end
-	--if not IsPauseMenuActive() and UpdateOnscreenKeyboard() ~= 0 and not radio_wheel_active then
+	if not player_is_emerg_driver then return end
 	if lights_on then
 		AUDIO:Play('Off', AUDIO.off_volume)
 		--	SET NUI IMAGES
@@ -998,6 +1065,7 @@ RegisterKeyMapping("*lvc:Lights", "LVC: Enable Emergency Lights", "keyboard", "Q
 
 RegisterCommand("*lvc:toggleSiren", function(source, args, raw)
 	if not canUseKeys() then return end
+	if not player_is_emerg_driver then return end
 
 	if state_lxsiren[veh] == 0 then
 		if lights_on then
