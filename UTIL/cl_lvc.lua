@@ -67,8 +67,8 @@ state_indic = {}
 state_lxsiren = {}
 state_pwrcall = {}
 state_airmanu = {}
-actv_manu = nil
-actv_horn = nil
+actv_manu = false
+actv_horn = false
 
 local update_data = {}
 
@@ -1110,6 +1110,7 @@ RegisterKeyMapping("*lvc:toggleSiren", "LVC: Toggle the siren", "keyboard", "LME
 
 RegisterCommand("*lvc:togglePowercall", function(source, args, raw)
 	if not canUseKeys() then return end
+	if not player_is_emerg_driver then return end
 	if IsMenuOpen() then return end
 
 	if state_pwrcall[veh] == 0 then
@@ -1131,6 +1132,7 @@ RegisterKeyMapping("*lvc:togglePowercall", "LVC: Toggle Auxiliary Siren/Powercal
 
 RegisterCommand("+lvc:cycleSiren", function(source, args, raw)
 	if not canUseKeys() then return end
+	if not player_is_emerg_driver then return end
 	
 	if state_lxsiren[veh] > 0 then
 		HUD:SetItemState('horn', true)
@@ -1147,6 +1149,7 @@ RegisterCommand("+lvc:cycleSiren", function(source, args, raw)
 end, false)
 RegisterCommand("-lvc:cycleSiren", function(source, args, raw)
 	if not canUseKeys() then return end
+	if not player_is_emerg_driver then return end
 
 	if state_lxsiren[veh] > 0 then
 		AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
@@ -1165,10 +1168,14 @@ RegisterCommand("-lvc:cycleSiren", function(source, args, raw)
 end, false)
 RegisterKeyMapping("+lvc:cycleSiren", "LVC: Cycle Siren / Manual", "keyboard", "R")
 
+local isHornHeld = false
 RegisterCommand("+lvc:horn", function(source, args, raw)
 	if not canUseKeys() then return end
 
+	if not player_is_emerg_driver then return end
+  if isHornHeld then return end
 	actv_horn = true
+	isHornHeld = true
 	AUDIO:ResetActivityTimer()
 	HUD:SetItemState('horn', true)
 
@@ -1177,11 +1184,13 @@ RegisterCommand("+lvc:horn", function(source, args, raw)
 	end
 end, false)
 RegisterCommand("-lvc:horn", function(source, args, raw)
+	if not player_is_emerg_driver then return end
 
 	--if actv_horn or actv_manu then
 		HUD:SetItemState('horn', false)
 	--end
 	actv_horn = false
+	isHornHeld = false
 
 	if AUDIO.airhorn_button_SFX then
 		AUDIO:Play('Release', AUDIO.upgrade_volume)
