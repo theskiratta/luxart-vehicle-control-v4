@@ -5,7 +5,7 @@ LUXART VEHICLE CONTROL V3 (FOR FIVEM)
 Coded by Lt.Caine
 ELS Clicks by Faction
 Additional Modification by TrevorBarns
-Adjustment to use statebags by theskiratta
+Network syncing reworked by theskiratta
 ---------------------------------------------------
 FILE: cl_lvc.lua
 PURPOSE: Core Functionality and User Input
